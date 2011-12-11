@@ -16,3 +16,7 @@ http://code.google.com/chrome/webstore/docs/get_started_simple.html#step4
 #### API ####
 A config.php file must be created from the config.dist.php file provided. An
 oAuth key and secret must be obtained from LinkedIn and provided in config.php.
+
+## Credits ##
+A big thank you to Mark Geller for inspiring me to create this extension,
+providing the product support and giving feedback.
