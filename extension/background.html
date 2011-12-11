@@ -1,0 +1,95 @@
+<html>
+<head>
+<script>
+var enabled;
+
+function getGmailUrl() {
+	var url = "https://mail.google.com/";
+	if (localStorage.customDomain)
+	url += localStorage.customDomain + "/";
+	else
+	url += "mail/"
+	return url;
+}
+
+// This is the Gmail we're looking for if:
+// - starts with the correct gmail url
+// - doesn't contain any other path chars
+function isGmailUrl(url) {
+	var gmail = getGmailUrl();
+	if (url.indexOf(gmail) != 0)
+	return false;
+
+	return url.length == gmail.length || url[gmail.length] == '?' ||
+					   url[gmail.length] == '#';
+}
+
+function enableIntroLink() {
+	chrome.browserAction.setBadgeBackgroundColor({color:[208, 0, 24, 255]});
+	chrome.browserAction.setIcon({path: "badge.png"});
+}
+
+function disableIntroLink() {
+	chrome.browserAction.setIcon({path:"badge_disabled.png"});
+	chrome.browserAction.setBadgeBackgroundColor({color:[190, 190, 190, 230]});
+}
+
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+	// this means the tabs status changed, but not the url
+	if (typeof changeInfo.url === 'undefined') {
+	return;
+	}
+
+	if (changeInfo.url && isGmailUrl(changeInfo.url)) {
+		//console.log('Sending requset to poll');
+		chrome.tabs.sendRequest(tabId, {poll: true}, function(response) {
+			//console.log('Polling has started');
+		});
+	} else {
+		disableIntroLink();
+	}
+});
+
+chrome.tabs.onSelectionChanged.addListener(function(tabId, changeInfo) {
+	chrome.tabs.getSelected(null,function(tab) {
+	    if (tab.url && isGmailUrl(tab.url)) {
+		
+			//console.log('Sending requset to poll');
+			chrome.tabs.sendRequest(tab.id, {poll: true}, function(response) {
+				//console.log('Polling has started');
+			});
+	    } else {
+			disableIntroLink();
+	    }
+	});
+});
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+	if (enabled) {
+		//console.log('Sending request to insert link');
+		chrome.tabs.sendRequest(tab.id, {link: true}, function(response) {
+			//console.log('Link has been inserted');
+		});
+	}
+});
+
+chrome.extension.onConnect.addListener(function(port) {
+	port.onMessage.addListener(function(msg) {
+		//console.log(msg);
+		if (msg.emails.length > 0) {
+			//console.log('enableIntroLink');
+			enabled = true;
+			enableIntroLink();
+		} else {
+			//console.log('disableIntroLink');
+			enabled = false;
+			disableIntroLink();
+		}
+	});
+});
+
+</script>
+</head>
+<body onload="disableIntroLink()">
+</body>
+</html>

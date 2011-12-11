@@ -1,0 +1,19 @@
+{
+  "background_page": "background.html",
+  "browser_action": {
+    "default_title": ""
+  },
+  "description": "Introduce two email contacts via LinkedIn API",
+  "icons": {
+    "128": "icon_128.png"
+  },
+  "name": "IntroLink",
+  "permissions": [
+    "tabs", "http://*.google.com/", "https://*.google.com/"
+   ],
+  "version": "0.1.1",
+  "content_scripts": [ {
+      "js": [ "jquery-1.6.4.min.js", "introlink.js" ],
+      "matches": [ "http://*.google.com/*", "https://*.google.com/*" ]
+   } ]
+}
